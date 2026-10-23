@@ -1,0 +1,47 @@
+{
+  "system": "Multi-Cloud Disaster Recovery Platform",
+  "environment": "production-simulation",
+  "version": "1.0.0",
+  "records": [
+    {
+      "id": "rec-001",
+      "customer_id": "cust-alpha-9821",
+      "account_balance": 154200.50,
+      "currency": "USD",
+      "region_origin": "us-east-1",
+      "status": "COMPLETED",
+      "timestamp": "2026-10-23T16:00:00Z",
+      "checksum_signature": "a1b2c3d4e5f60718"
+    },
+    {
+      "id": "rec-002",
+      "customer_id": "cust-beta-4412",
+      "account_balance": 89230.00,
+      "currency": "EUR",
+      "region_origin": "us-east-1",
+      "status": "PENDING_REPLICATION",
+      "timestamp": "2026-10-23T16:05:00Z",
+      "checksum_signature": "f9e8d7c6b5a41234"
+    },
+    {
+      "id": "rec-003",
+      "customer_id": "cust-gamma-7731",
+      "account_balance": 3410500.25,
+      "currency": "USD",
+      "region_origin": "us-east-1",
+      "status": "COMPLETED",
+      "timestamp": "2026-10-23T16:10:00Z",
+      "checksum_signature": "9988776655443322"
+    },
+    {
+      "id": "rec-004",
+      "customer_id": "cust-delta-1029",
+      "account_balance": 12500.75,
+      "currency": "GBP",
+      "region_origin": "us-east-1",
+      "status": "COMPLETED",
+      "timestamp": "2026-10-23T16:15:00Z",
+      "checksum_signature": "1122334455667788"
+    }
+  ]
+}

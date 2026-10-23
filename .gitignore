@@ -1,0 +1,41 @@
+# Dependencies
+node_modules/
+package-lock.json
+
+# Environment and sensitive keys
+.env
+.env.*
+*.pem
+*.key
+*.token
+
+# Logs
+*.log
+data/*.log
+npm-debug.log*
+
+# Runtime generated backups and manifests
+data/backups/*
+!data/backups/.gitkeep
+
+# Restored files
+data/restored/*
+!data/restored/.gitkeep
+
+# Runtime replica and event history
+data/storage/dr_replica_dataset.json
+data/event_history.json
+
+# Terraform local state and plugins
+.terraform/
+.terraform.lock.hcl
+*.tfstate
+*.tfstate.*
+crash.log
+
+# Operating System files
+.DS_Store
+Thumbs.db
+
+# Workspace symlink
+platform-link

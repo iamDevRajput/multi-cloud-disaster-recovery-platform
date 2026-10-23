@@ -1,0 +1,1099 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Multi-Cloud Disaster Recovery & Backup Automation Platform</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-base: #0a0f1d;
+      --bg-surface: #111827;
+      --bg-surface-elevated: #1f2937;
+      --bg-card: rgba(17, 24, 39, 0.85);
+      --border-subtle: #2d3748;
+      --border-focus: #3b82f6;
+      --text-main: #f3f4f6;
+      --text-muted: #9ca3af;
+      --text-dim: #6b7280;
+      
+      --accent-blue: #3b82f6;
+      --accent-cyan: #06b6d4;
+      --accent-emerald: #10b981;
+      --accent-amber: #f59e0b;
+      --accent-rose: #ef4444;
+      --accent-purple: #8b5cf6;
+      
+      --glow-cyan: 0 0 20px rgba(6, 182, 212, 0.25);
+      --glow-emerald: 0 0 20px rgba(16, 185, 129, 0.25);
+      --glow-rose: 0 0 20px rgba(239, 68, 68, 0.35);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--bg-base);
+      color: var(--text-main);
+      line-height: 1.5;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Top Navigation Bar */
+    header {
+      background: rgba(17, 24, 39, 0.95);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border-subtle);
+      padding: 14px 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-icon {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue));
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      font-weight: 700;
+      color: white;
+      box-shadow: var(--glow-cyan);
+    }
+
+    .brand-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .brand-subtitle {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .header-status {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .active-region-pill {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      background: rgba(16, 185, 129, 0.12);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      border-radius: 9999px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--accent-emerald);
+      box-shadow: var(--glow-emerald);
+      transition: all 0.3s ease;
+    }
+
+    .active-region-pill.dr-active {
+      background: rgba(245, 158, 11, 0.15);
+      border-color: rgba(245, 158, 11, 0.4);
+      color: var(--accent-amber);
+      box-shadow: 0 0 20px rgba(245, 158, 11, 0.3);
+    }
+
+    .pulse-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background-color: currentColor;
+      animation: pulse 1.8s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(1.3); }
+    }
+
+    .btn-secondary {
+      background: var(--bg-surface-elevated);
+      color: var(--text-main);
+      border: 1px solid var(--border-subtle);
+      padding: 7px 14px;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+
+    .btn-secondary:hover {
+      background: #283548;
+      border-color: var(--border-focus);
+    }
+
+    /* Main Container */
+    main {
+      flex: 1;
+      max-width: 1440px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 28px 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    /* Grid Layouts */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 24px;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+
+    @media (max-width: 1024px) {
+      .grid-2, .grid-3 {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Card Component */
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 20px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .card-title {
+      font-size: 1rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .badge {
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      padding: 3px 8px;
+      border-radius: 4px;
+      letter-spacing: 0.05em;
+    }
+
+    .badge-success { background: rgba(16, 185, 129, 0.18); color: var(--accent-emerald); border: 1px solid rgba(16, 185, 129, 0.3); }
+    .badge-danger { background: rgba(239, 68, 68, 0.18); color: var(--accent-rose); border: 1px solid rgba(239, 68, 68, 0.3); }
+    .badge-warning { background: rgba(245, 158, 11, 0.18); color: var(--accent-amber); border: 1px solid rgba(245, 158, 11, 0.3); }
+    .badge-info { background: rgba(59, 130, 246, 0.18); color: var(--accent-blue); border: 1px solid rgba(59, 130, 246, 0.3); }
+
+    /* Region Health Status Cards */
+    .region-card {
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.2s, border-color 0.2s;
+    }
+
+    .region-card.active-route {
+      border-color: var(--accent-cyan);
+      box-shadow: 0 0 25px rgba(6, 182, 212, 0.15);
+    }
+
+    .region-meta {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      background: var(--bg-surface);
+      border-radius: 8px;
+      padding: 12px 16px;
+    }
+
+    .meta-item {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .meta-label {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      font-weight: 500;
+    }
+
+    .meta-value {
+      font-size: 1rem;
+      font-weight: 600;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* Action Buttons */
+    .btn-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .btn {
+      padding: 9px 16px;
+      border-radius: 7px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid transparent;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.2s;
+    }
+
+    .btn:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    .btn-danger {
+      background: rgba(239, 68, 68, 0.15);
+      color: #fca5a5;
+      border-color: rgba(239, 68, 68, 0.4);
+    }
+    .btn-danger:hover:not(:disabled) {
+      background: rgba(239, 68, 68, 0.25);
+      border-color: var(--accent-rose);
+      color: #fff;
+    }
+
+    .btn-success {
+      background: rgba(16, 185, 129, 0.15);
+      color: #6ee7b7;
+      border-color: rgba(16, 185, 129, 0.4);
+    }
+    .btn-success:hover:not(:disabled) {
+      background: rgba(16, 185, 129, 0.25);
+      border-color: var(--accent-emerald);
+      color: #fff;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent-blue), #2563eb);
+      color: white;
+    }
+    .btn-primary:hover:not(:disabled) {
+      background: linear-gradient(135deg, #60a5fa, var(--accent-blue));
+      box-shadow: 0 0 16px rgba(59, 130, 246, 0.4);
+    }
+
+    .btn-warning {
+      background: rgba(245, 158, 11, 0.15);
+      color: #fcd34d;
+      border-color: rgba(245, 158, 11, 0.4);
+    }
+    .btn-warning:hover:not(:disabled) {
+      background: rgba(245, 158, 11, 0.25);
+      border-color: var(--accent-amber);
+      color: #fff;
+    }
+
+    /* Live Traffic Route Diagram */
+    .traffic-flow-card {
+      background: linear-gradient(180deg, rgba(17, 24, 39, 0.95), rgba(15, 23, 42, 0.95));
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 18px 24px;
+    }
+
+    .route-visualizer {
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      padding: 16px 0;
+      position: relative;
+    }
+
+    .node {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      z-index: 2;
+    }
+
+    .node-box {
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px;
+      padding: 10px 16px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    }
+
+    .node-box.active {
+      border-color: var(--accent-cyan);
+      box-shadow: var(--glow-cyan);
+      background: rgba(6, 182, 212, 0.1);
+      color: var(--accent-cyan);
+    }
+
+    .route-arrow {
+      flex: 1;
+      height: 2px;
+      background: var(--border-subtle);
+      position: relative;
+      margin: 0 16px;
+    }
+
+    .route-arrow.active {
+      background: linear-gradient(90deg, var(--accent-cyan), var(--accent-blue));
+      box-shadow: 0 0 10px var(--accent-cyan);
+    }
+
+    /* Event Audit History Table */
+    .table-container {
+      overflow-x: auto;
+      max-height: 260px;
+      overflow-y: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.82rem;
+      text-align: left;
+    }
+
+    th {
+      background: var(--bg-surface);
+      color: var(--text-muted);
+      font-weight: 600;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border-subtle);
+      position: sticky;
+      top: 0;
+    }
+
+    td {
+      padding: 10px 14px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      color: var(--text-main);
+    }
+
+    tr:hover td {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .hash-text {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+      color: var(--accent-cyan);
+      word-break: break-all;
+    }
+
+    /* Notification / Toast */
+    #toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-focus);
+      padding: 14px 20px;
+      border-radius: 8px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+      display: none;
+      z-index: 100;
+      font-size: 0.9rem;
+      max-width: 420px;
+      animation: slideIn 0.3s ease;
+    }
+
+    @keyframes slideIn {
+      from { transform: translateY(20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    .status-banner {
+      padding: 10px 16px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Header Navigation -->
+  <header>
+    <div class="brand">
+      <div class="brand-icon">⚡</div>
+      <div>
+        <h1 class="brand-title">Multi-Cloud Disaster Recovery Platform</h1>
+        <div class="brand-subtitle">Automated Multi-Region Failover & Integrity Verified Backup</div>
+      </div>
+    </div>
+
+    <div class="header-status">
+      <div id="activeRegionBadge" class="active-region-pill">
+        <span class="pulse-dot"></span>
+        <span id="activeRegionText">ACTIVE REGION: US-EAST-1</span>
+      </div>
+
+      <button id="btnRefresh" class="btn-secondary" onclick="fetchStatus()">
+        <span>🔄</span> Refresh
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Content Layout -->
+  <main>
+
+    <!-- Top Traffic Visualizer -->
+    <section class="traffic-flow-card">
+      <div class="card-header" style="border: none; padding: 0 0 12px 0;">
+        <span class="card-title">🌐 Live Traffic Ingress & Health-Based Routing</span>
+        <span id="failoverModeBadge" class="badge badge-success">AUTO-FAILOVER ACTIVE</span>
+      </div>
+      <div class="route-visualizer">
+        <div class="node">
+          <div class="node-box">
+            <span>🌍</span> Global Client Ingress
+          </div>
+          <span style="font-size: 0.72rem; color: var(--text-muted);">Route 53 / Anycast DNS</span>
+        </div>
+
+        <div id="routeArrowPrimary" class="route-arrow active"></div>
+
+        <div class="node">
+          <div id="nodePrimary" class="node-box active">
+            <span>🏛️</span> Primary (us-east-1)
+          </div>
+          <span id="nodePrimaryStatus" style="font-size: 0.72rem; color: var(--accent-emerald);">● HEALTHY (PORT 5001)</span>
+        </div>
+
+        <div id="routeArrowDR" class="route-arrow"></div>
+
+        <div class="node">
+          <div id="nodeDR" class="node-box">
+            <span>🛡️</span> DR Secondary (us-west-2)
+          </div>
+          <span id="nodeDRStatus" style="font-size: 0.72rem; color: var(--accent-amber);">● STANDBY (PORT 5002)</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Primary & DR Regions Controls -->
+    <section class="grid-2">
+      
+      <!-- Primary Region Service Card -->
+      <div class="card region-card" id="primaryCard">
+        <div class="card-header">
+          <div class="card-title">
+            <span>🇺🇸</span> Primary Region: <strong>US-East (N. Virginia)</strong>
+          </div>
+          <span id="primaryStatusBadge" class="badge badge-success">HEALTHY</span>
+        </div>
+
+        <div class="region-meta">
+          <div class="meta-item">
+            <span class="meta-label">Region</span>
+            <span class="meta-value">us-east-1</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">Probe Latency</span>
+            <span id="primaryLatency" class="meta-value">12 ms</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">HTTP Health</span>
+            <span id="primaryHttpCode" class="meta-value">200 OK</span>
+          </div>
+        </div>
+
+        <div id="primaryFailureAlert" style="display: none;" class="status-banner" style="background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.3); color: #fca5a5;">
+          <span>⚠️</span> <span id="primaryFailureReason">Simulated Datacenter Outage Active</span>
+        </div>
+
+        <div style="font-size: 0.8rem; color: var(--text-muted);">
+          Simulate a real cloud failure to test health detection and automatic promotion of the recovery site:
+        </div>
+
+        <div class="btn-group">
+          <button id="btnSimulateDown" class="btn btn-danger" onclick="simulatePrimaryDown()">
+            <span>💥</span> Simulate Primary Outage
+          </button>
+          <button id="btnSimulateUp" class="btn btn-success" onclick="simulatePrimaryUp()">
+            <span>🩺</span> Recover Primary Service
+          </button>
+        </div>
+      </div>
+
+      <!-- DR Secondary Region Service Card -->
+      <div class="card region-card" id="drCard">
+        <div class="card-header">
+          <div class="card-title">
+            <span>🇺🇸</span> Disaster Recovery: <strong>US-West (Oregon)</strong>
+          </div>
+          <span id="drStatusBadge" class="badge badge-warning">STANDBY_DR</span>
+        </div>
+
+        <div class="region-meta">
+          <div class="meta-item">
+            <span class="meta-label">Region</span>
+            <span class="meta-value">us-west-2</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">Probe Latency</span>
+            <span id="drLatency" class="meta-value">26 ms</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">HTTP Health</span>
+            <span id="drHttpCode" class="meta-value">200 OK</span>
+          </div>
+        </div>
+
+        <div style="font-size: 0.8rem; color: var(--text-muted);">
+          Control failover execution and failback restoration across regions:
+        </div>
+
+        <div class="btn-group">
+          <button id="btnManualFailover" class="btn btn-warning" onclick="triggerFailover()">
+            <span>🚨</span> Trigger Emergency Failover
+          </button>
+          <button id="btnFailback" class="btn btn-primary" onclick="triggerFailback()">
+            <span>🔄</span> Recover to Primary (Failback)
+          </button>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- Backup & Restore Integrity Hub -->
+    <section class="card">
+      <div class="card-header">
+        <div class="card-title">
+          <span>💾</span> Cryptographic Backup & Restore Integrity Hub
+        </div>
+        <span class="badge badge-info">SHA-256 VERIFIED</span>
+      </div>
+
+      <div style="font-size: 0.85rem; color: var(--text-muted);">
+        Every backup generates an immutable manifest with timestamp, byte count, and cryptographic SHA-256 hash. Restoring writes to a segregated path and verifies checksum integrity byte-for-byte.
+      </div>
+
+      <div class="btn-group">
+        <button id="btnCreateBackup" class="btn btn-primary" onclick="createBackup()">
+          <span>➕</span> Create Instant Backup
+        </button>
+        <button id="btnRestoreLatest" class="btn btn-success" onclick="restoreLatestBackup()">
+          <span>📥</span> Restore & Verify Checksum
+        </button>
+        <button id="btnTestCorrupt" class="btn btn-danger" onclick="testCorruptBackup()">
+          <span>🧪</span> Test Corrupted Backup Detection
+        </button>
+        <button id="btnTestMissing" class="btn btn-secondary" onclick="testMissingBackup()">
+          <span>🔍</span> Test Missing Backup Trapping
+        </button>
+      </div>
+
+      <!-- Live Verification Result Panel -->
+      <div id="verificationResultPanel" style="display: none; background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: 8px; padding: 14px 18px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+          <strong id="verificationTitle" style="font-size: 0.9rem;">Verification Results</strong>
+          <span id="verificationBadge" class="badge">VERIFIED</span>
+        </div>
+        <div style="display: grid; grid-template-columns: 140px 1fr; gap: 8px; font-size: 0.8rem;">
+          <span style="color: var(--text-muted);">Expected Manifest:</span>
+          <span id="expectedHash" class="hash-text">...</span>
+          <span style="color: var(--text-muted);">Restored Payload:</span>
+          <span id="restoredHash" class="hash-text">...</span>
+          <span style="color: var(--text-muted);">Status Message:</span>
+          <span id="verificationMsg" style="color: var(--text-main);">...</span>
+        </div>
+      </div>
+
+      <!-- Backup Manifests Table -->
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Manifest ID</th>
+              <th>Created Timestamp</th>
+              <th>Records</th>
+              <th>Size</th>
+              <th>SHA-256 Checksum Signature</th>
+              <th>Origin Region</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="backupsTableBody">
+            <tr>
+              <td colspan="7" style="text-align: center; color: var(--text-dim);">No backup manifests generated yet. Click "Create Instant Backup" above.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Lower Section: Audit Log & Terraform / REA Inspection -->
+    <section class="grid-2">
+
+      <!-- Event Audit Log -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">
+            <span>📜</span> Disaster Recovery Event Audit Log
+          </div>
+          <span id="eventCountBadge" class="badge badge-info">0 EVENTS</span>
+        </div>
+
+        <div class="table-container" style="max-height: 280px;">
+          <table>
+            <thead>
+              <tr>
+                <th>Time (UTC)</th>
+                <th>Event Type</th>
+                <th>Severity</th>
+                <th>Details</th>
+              </tr>
+            </thead>
+            <tbody id="eventsTableBody">
+              <tr>
+                <td colspan="4" style="text-align: center; color: var(--text-dim);">Listening for cluster events...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Infrastructure as Code & Security Inspection Card -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">
+            <span>🏗️</span> Infrastructure as Code & Forensics
+          </div>
+          <span id="tfStatusBadge" class="badge badge-success">VALIDATED</span>
+        </div>
+
+        <div style="font-size: 0.85rem; color: var(--text-muted); display: flex; flex-direction: column; gap: 12px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; background: var(--bg-surface); padding: 10px 14px; border-radius: 6px;">
+            <span>Terraform Core:</span>
+            <strong style="color: var(--accent-emerald);">v1.8.5 (darwin_arm64)</strong>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center; background: var(--bg-surface); padding: 10px 14px; border-radius: 6px;">
+            <span>AWS Multi-Region Modules:</span>
+            <strong style="color: var(--accent-cyan);">VPC, Aurora Global, S3 CRR, Route 53</strong>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center; background: var(--bg-surface); padding: 10px 14px; border-radius: 6px;">
+            <span>REA + Ghidra Engine:</span>
+            <strong style="color: var(--accent-purple);">Ghidra 12.1.4 PUBLIC (Java 25 LTS)</strong>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center; background: var(--bg-surface); padding: 10px 14px; border-radius: 6px;">
+            <span>Binary Forensics Report:</span>
+            <a href="javascript:void(0)" onclick="showToast('View report at docs/security/binary-analysis.md')" style="color: var(--accent-blue); text-decoration: none;">docs/security/binary-analysis.md</a>
+          </div>
+        </div>
+
+        <div class="btn-group" style="margin-top: 4px;">
+          <button class="btn btn-secondary" onclick="checkTerraformStatus()">
+            <span>🔍</span> Re-validate Terraform
+          </button>
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- Notification Toast -->
+  <div id="toast">
+    <div id="toastMessage">Action completed successfully</div>
+  </div>
+
+  <script>
+    const API_BASE = '';
+
+    function showToast(message, isError = false) {
+      const toast = document.getElementById('toast');
+      const toastMsg = document.getElementById('toastMessage');
+      toastMsg.innerText = message;
+      toast.style.borderColor = isError ? 'var(--accent-rose)' : 'var(--accent-emerald)';
+      toast.style.display = 'block';
+      setTimeout(() => { toast.style.display = 'none'; }, 4000);
+    }
+
+    async function fetchStatus() {
+      try {
+        const res = await fetch(`${API_BASE}/api/dr/status`);
+        const data = await res.json();
+        updateUI(data);
+      } catch (err) {
+        console.error('Failed to fetch DR status:', err);
+      }
+    }
+
+    function updateUI(data) {
+      const { active_region, primary_health, dr_health, recent_events } = data;
+
+      // Active Region Header Badge
+      const activePill = document.getElementById('activeRegionBadge');
+      const activeText = document.getElementById('activeRegionText');
+      if (active_region === 'us-east-1') {
+        activePill.className = 'active-region-pill';
+        activeText.innerText = 'ACTIVE REGION: US-EAST-1 (PRIMARY)';
+      } else {
+        activePill.className = 'active-region-pill dr-active';
+        activeText.innerText = 'ACTIVE REGION: US-WEST-2 (DR FAILOVER)';
+      }
+
+      // Visual Routing Flow
+      const arrowPrimary = document.getElementById('routeArrowPrimary');
+      const arrowDR = document.getElementById('routeArrowDR');
+      const nodePrimary = document.getElementById('nodePrimary');
+      const nodeDR = document.getElementById('nodeDR');
+
+      if (active_region === 'us-east-1') {
+        arrowPrimary.className = 'route-arrow active';
+        arrowDR.className = 'route-arrow';
+        nodePrimary.className = 'node-box active';
+        nodeDR.className = 'node-box';
+      } else {
+        arrowPrimary.className = 'route-arrow';
+        arrowDR.className = 'route-arrow active';
+        nodePrimary.className = 'node-box';
+        nodeDR.className = 'node-box active';
+      }
+
+      // Primary Status
+      const primaryBadge = document.getElementById('primaryStatusBadge');
+      const primaryLatency = document.getElementById('primaryLatency');
+      const primaryHttp = document.getElementById('primaryHttpCode');
+      const primaryAlert = document.getElementById('primaryFailureAlert');
+      const nodePrimaryStatus = document.getElementById('nodePrimaryStatus');
+
+      primaryLatency.innerText = (primary_health.latency_ms || 0) + ' ms';
+      primaryHttp.innerText = primary_health.http_code ? `${primary_health.http_code} ${primary_health.http_code === 200 ? 'OK' : 'FAIL'}` : 'TIMEOUT';
+
+      if (primary_health.status === 'HEALTHY') {
+        primaryBadge.className = 'badge badge-success';
+        primaryBadge.innerText = 'HEALTHY';
+        primaryAlert.style.display = 'none';
+        nodePrimaryStatus.innerText = '● HEALTHY (PORT 5001)';
+        nodePrimaryStatus.style.color = 'var(--accent-emerald)';
+      } else {
+        primaryBadge.className = 'badge badge-danger';
+        primaryBadge.innerText = 'UNHEALTHY / DOWN';
+        primaryAlert.style.display = 'flex';
+        document.getElementById('primaryFailureReason').innerText = primary_health.error || 'Simulated Outage Active';
+        nodePrimaryStatus.innerText = '● FAILED / OUTAGE';
+        nodePrimaryStatus.style.color = 'var(--accent-rose)';
+      }
+
+      // DR Status
+      const drBadge = document.getElementById('drStatusBadge');
+      const drLatency = document.getElementById('drLatency');
+      const drHttp = document.getElementById('drHttpCode');
+      const nodeDRStatus = document.getElementById('nodeDRStatus');
+
+      drLatency.innerText = (dr_health.latency_ms || 0) + ' ms';
+      drHttp.innerText = dr_health.http_code ? `${dr_health.http_code} OK` : 'TIMEOUT';
+
+      if (dr_health.status === 'HEALTHY') {
+        if (active_region === 'us-west-2') {
+          drBadge.className = 'badge badge-success';
+          drBadge.innerText = 'ACTIVE_FAILOVER';
+          nodeDRStatus.innerText = '● ACTIVE_FAILOVER (PORT 5002)';
+          nodeDRStatus.style.color = 'var(--accent-emerald)';
+        } else {
+          drBadge.className = 'badge badge-warning';
+          drBadge.innerText = 'STANDBY_DR';
+          nodeDRStatus.innerText = '● STANDBY (PORT 5002)';
+          nodeDRStatus.style.color = 'var(--accent-amber)';
+        }
+      } else {
+        drBadge.className = 'badge badge-danger';
+        drBadge.innerText = 'UNHEALTHY';
+        nodeDRStatus.innerText = '● OUTAGE';
+        nodeDRStatus.style.color = 'var(--accent-rose)';
+      }
+
+      // Event Audit Log
+      renderEvents(recent_events);
+    }
+
+    function renderEvents(events) {
+      const tbody = document.getElementById('eventsTableBody');
+      const badge = document.getElementById('eventCountBadge');
+      if (!events || events.length === 0) return;
+
+      badge.innerText = `${events.length} EVENTS`;
+      tbody.innerHTML = events.slice(0, 15).map(evt => {
+        let severityBadge = 'badge-info';
+        if (evt.severity === 'CRITICAL') severityBadge = 'badge-danger';
+        if (evt.severity === 'WARNING') severityBadge = 'badge-warning';
+        if (evt.severity === 'SUCCESS') severityBadge = 'badge-success';
+
+        const timeStr = new Date(evt.timestamp).toLocaleTimeString();
+        return `
+          <tr>
+            <td style="font-family: 'JetBrains Mono', monospace; font-size: 0.75rem;">${timeStr}</td>
+            <td><strong>${evt.type}</strong></td>
+            <td><span class="badge ${severityBadge}">${evt.severity}</span></td>
+            <td>${evt.title}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    async function loadBackups() {
+      try {
+        const res = await fetch(`${API_BASE}/api/backup/list`);
+        const data = await res.json();
+        const tbody = document.getElementById('backupsTableBody');
+
+        if (!data.backups || data.backups.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--text-dim);">No backup manifests generated yet. Click "Create Instant Backup" above.</td></tr>`;
+          return;
+        }
+
+        tbody.innerHTML = data.backups.map(bkp => {
+          const time = new Date(bkp.timestamp).toLocaleString();
+          return `
+            <tr>
+              <td><code>${bkp.backup_id}</code></td>
+              <td>${time}</td>
+              <td>${bkp.records_count}</td>
+              <td>${(bkp.size_bytes / 1024).toFixed(2)} KB</td>
+              <td class="hash-text" title="${bkp.sha256}">${bkp.sha256.substring(0, 20)}...</td>
+              <td><span class="badge badge-info">${bkp.source_region}</span></td>
+              <td>
+                <button class="btn-secondary" style="padding: 4px 8px; font-size: 0.75rem;" onclick="restoreSpecificBackup('${bkp.manifest_file}')">
+                  Restore
+                </button>
+              </td>
+            </tr>
+          `;
+        }).join('');
+      } catch (err) {
+        console.error('Failed to load backups:', err);
+      }
+    }
+
+    // Action Triggers
+    async function simulatePrimaryDown() {
+      showToast('Simulating Primary Region Outage in us-east-1...');
+      try {
+        await fetch(`${API_BASE}/api/dr/simulate-primary-down`, { method: 'POST' });
+        setTimeout(fetchStatus, 800);
+      } catch (e) {
+        showToast('Action failed: ' + e.message, true);
+      }
+    }
+
+    async function simulatePrimaryUp() {
+      showToast('Restoring Primary Region in us-east-1...');
+      try {
+        await fetch(`${API_BASE}/api/dr/simulate-primary-up`, { method: 'POST' });
+        setTimeout(fetchStatus, 800);
+      } catch (e) {
+        showToast('Action failed: ' + e.message, true);
+      }
+    }
+
+    async function triggerFailover() {
+      showToast('Executing Emergency Failover to us-west-2...');
+      try {
+        const res = await fetch(`${API_BASE}/api/dr/failover`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ reason: 'MANUAL_OPERATOR_DASHBOARD_FAILOVER' })
+        });
+        const data = await res.json();
+        showToast(`Failover executed! Active Region is now ${data.active_region}`);
+        setTimeout(fetchStatus, 500);
+      } catch (e) {
+        showToast('Failover failed: ' + e.message, true);
+      }
+    }
+
+    async function triggerFailback() {
+      showToast('Attempting Failback to Primary Region...');
+      try {
+        const res = await fetch(`${API_BASE}/api/dr/failback`, { method: 'POST' });
+        const data = await res.json();
+        if (data.error) {
+          showToast(`Failback blocked: ${data.error}`, true);
+        } else {
+          showToast('Failback successful! Primary region restored as active.');
+          setTimeout(fetchStatus, 500);
+        }
+      } catch (e) {
+        showToast('Failback failed: ' + e.message, true);
+      }
+    }
+
+    async function createBackup() {
+      showToast('Generating snapshot and calculating SHA-256 checksum...');
+      try {
+        const res = await fetch(`${API_BASE}/api/backup/create`, { method: 'POST' });
+        const data = await res.json();
+        if (data.success) {
+          showToast(`Backup ${data.manifest.backup_id} created with SHA-256 verification.`);
+          loadBackups();
+          fetchStatus();
+        } else {
+          showToast('Backup creation failed: ' + data.error, true);
+        }
+      } catch (e) {
+        showToast('Backup creation error: ' + e.message, true);
+      }
+    }
+
+    async function restoreLatestBackup() {
+      showToast('Restoring dataset and verifying SHA-256 signature...');
+      try {
+        const res = await fetch(`${API_BASE}/api/backup/restore`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({})
+        });
+        const data = await res.json();
+        displayVerification(data);
+      } catch (e) {
+        showToast('Restore error: ' + e.message, true);
+      }
+    }
+
+    async function restoreSpecificBackup(manifestFile) {
+      showToast(`Restoring from manifest ${manifestFile}...`);
+      try {
+        const res = await fetch(`${API_BASE}/api/backup/restore`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ manifest_file: manifestFile })
+        });
+        const data = await res.json();
+        displayVerification(data);
+      } catch (e) {
+        showToast('Restore error: ' + e.message, true);
+      }
+    }
+
+    async function testCorruptBackup() {
+      showToast('Injecting bit-level corruption to test tamper detection...');
+      try {
+        const res = await fetch(`${API_BASE}/api/backup/test-corruption`, { method: 'POST' });
+        const data = await res.json();
+        displayVerification({
+          success: false,
+          status: 'CORRUPTION_DETECTED',
+          manifest_sha256: data.expected_manifest_sha256,
+          restored_sha256: data.tampered_file_sha256,
+          message: data.message
+        });
+        showToast('Corruption successfully detected and rejected!');
+        fetchStatus();
+      } catch (e) {
+        showToast('Test error: ' + e.message, true);
+      }
+    }
+
+    async function testMissingBackup() {
+      showToast('Attempting restore of non-existent backup...');
+      try {
+        const res = await fetch(`${API_BASE}/api/backup/test-missing`, { method: 'POST' });
+        const data = await res.json();
+        showToast(`Trapped Error: ${data.error}`, false);
+        fetchStatus();
+      } catch (e) {
+        showToast('Error: ' + e.message, true);
+      }
+    }
+
+    function displayVerification(data) {
+      const panel = document.getElementById('verificationResultPanel');
+      const badge = document.getElementById('verificationBadge');
+      const title = document.getElementById('verificationTitle');
+      const expHash = document.getElementById('expectedHash');
+      const resHash = document.getElementById('restoredHash');
+      const msg = document.getElementById('verificationMsg');
+
+      panel.style.display = 'block';
+      expHash.innerText = data.manifest_sha256 || 'N/A';
+      resHash.innerText = data.restored_sha256 || 'N/A';
+      msg.innerText = data.message || (data.success ? 'Integrity 100% Verified' : data.error);
+
+      if (data.status === 'VERIFIED_INTEGRITY' || data.success) {
+        badge.className = 'badge badge-success';
+        badge.innerText = 'INTEGRITY VERIFIED';
+        title.innerText = '✅ Checksum Verification Passed';
+      } else {
+        badge.className = 'badge badge-danger';
+        badge.innerText = 'TAMPER / MISMATCH DETECTED';
+        title.innerText = '⚠️ Integrity Verification Failed';
+      }
+      fetchStatus();
+    }
+
+    async function checkTerraformStatus() {
+      showToast('Executing terraform fmt -check and terraform validate...');
+      try {
+        const res = await fetch(`${API_BASE}/api/terraform/status`);
+        const data = await res.json();
+        showToast(`Terraform Status: ${data.validation_status} | fmt: ${data.fmt_check}`);
+      } catch (e) {
+        showToast('Failed to check Terraform: ' + e.message, true);
+      }
+    }
+
+    // Auto-poll every 3 seconds
+    setInterval(fetchStatus, 3000);
+    fetchStatus();
+    loadBackups();
+  </script>
+</body>
+</html>
